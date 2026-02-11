@@ -13,7 +13,7 @@ retries = Retry(
 )
 session.mount("https://", HTTPAdapter(max_retries=retries))
 
-SCRAPER_API = "https://ey-fmcg.onrender.com/scrape?months=1"
+SCRAPER_API = "https://ey-fmcg.onrender.com/scrape?months=3"
 
 
 # ---------------- Date Parser ---------------- #

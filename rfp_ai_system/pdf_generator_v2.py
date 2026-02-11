@@ -376,16 +376,15 @@ def generate_rfp_pdf(rfp_data, output_path):
     
     story.append(Paragraph("1.3 Scoring Methodology", styles["SubsectionHeader"]))
     story.append(Paragraph(
-    "The compatibility score is calculated using a weighted evaluation model "
-    "considering technical specification match (50%), supplier compliance and "
-    "certification (20%), commercial competitiveness (20%), and delivery lead time (10%). "
-    "Scores above 75% indicate strong bid viability.",
-    styles["ProposalBody"]
-))
-    story.append(PageBreak())
-
+        "The compatibility score is calculated using a weighted evaluation model "
+        "considering technical specification match (50%), supplier compliance and "
+        "certification (20%), commercial competitiveness (20%), and delivery lead time (10%). "
+        "Scores above 75% indicate strong bid viability.",
+        styles["ProposalBody"]
+    ))
     story.append(Spacer(1, 0.3 * inch))
     story.append(create_score_chart(score))
+    story.append(PageBreak())
 
     # ================= PROJECT DETAILS =================
     story.append(Paragraph("2. PROJECT DETAILS", styles["SectionHeader"]))
@@ -449,63 +448,6 @@ def generate_rfp_pdf(rfp_data, output_path):
             styles["ProposalBody"]
         ))
         story.append(Spacer(1, 0.2 * inch))
-        
-        story.append(Paragraph("3.2 Detailed Supplier Comparison", styles["SubsectionHeader"]))
-        
-        # Supplier table header
-        supplier_rows = [
-            ["#", "Product Description", "Match", "BIS", "Lead Time", "Unit Price"]
-        ]
-        
-        for idx, m in enumerate(matches[:15], 1):
-            bis_val = m.get("bis_certified", "No")
-            bis_text = "✓" if bis_val in (True, "Yes", "YES", "yes") else "✗"
-            
-            supplier_rows.append([
-                str(idx),
-                (m.get("product_name", "N/A") or "N/A")[:50],
-                f"{_to_float(m.get('spec_match_percent', 0.0), 0.0):.0f}%",
-                bis_text,
-                f"{int(_to_float(m.get('lead_time_days', 0), 0))} d",
-                _money_inr(m.get("unit_price", 0.0), decimals=2),
-            ])
-        
-        supplier_table = Table(
-            supplier_rows,
-            repeatRows=1,
-            colWidths=[0.4 * inch, 2.7 * inch, 0.7 * inch, 0.5 * inch, 0.8 * inch, 1.3 * inch]
-        )
-        supplier_table.setStyle(
-            TableStyle([
-                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1F4788")),
-                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-                ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                ("FONTSIZE", (0, 0), (-1, 0), 9),
-                ("ALIGN", (0, 0), (-1, 0), "CENTER"),
-                
-                ("FONTSIZE", (0, 1), (-1, -1), 8),
-                ("ALIGN", (0, 1), (0, -1), "CENTER"),
-                ("ALIGN", (1, 1), (1, -1), "LEFT"),
-                ("ALIGN", (2, 1), (-1, -1), "CENTER"),
-                
-                ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#CCCCCC")),
-                ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F9FAFB")]),
-                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                ("TOPPADDING", (0, 0), (-1, -1), 6),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-                ("LEFTPADDING", (0, 0), (-1, -1), 6),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
-            ])
-        )
-        
-        story.append(supplier_table)
-        
-        if len(matches) > 15:
-            story.append(Spacer(1, 0.1 * inch))
-            story.append(Paragraph(
-                f"<i>Note: Showing top 15 of {len(matches)} suppliers analyzed. Complete supplier list available upon request.</i>",
-                styles["ProposalFootnote"]
-            ))
     else:
         story.append(Paragraph(
             "No matching products were identified for this tender opportunity. "
