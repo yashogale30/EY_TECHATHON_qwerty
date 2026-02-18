@@ -1,0 +1,15 @@
+{
+    "rfp_count": 0,
+    "matches_per_rfp": [],
+    "tech_matches": [],
+    "min_score_threshold": 30.0,
+    "max_results_per_rfp": 30,
+    "spec_weights": {
+        "voltage": 0.25,
+        "standards": 0.2,
+        "conductor": 0.18,
+        "insulation": 0.15,
+        "cores": 0.12,
+        "armoring": 0.1
+    }
+}

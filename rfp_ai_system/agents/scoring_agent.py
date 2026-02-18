@@ -22,7 +22,7 @@ Total: 100 points scale (normalized to 0-1 for final score)
 from datetime import datetime
 from typing import List, Dict, Any
 import math
-
+from utils.agent_io import save_agent_output
 
 class RFPScorer:
     """
@@ -433,5 +433,14 @@ def scoring_agent(state):
     
     state["scores"] = simple_scores  # For master_agent compatibility
     state["detailed_scores"] = detailed_scores  # Full breakdown
-    
+    save_agent_output(
+    "scoring_agent",
+    {
+        "scores": simple_scores,
+        "detailed_scores": detailed_scores,
+        "scoring_weights": RFPScorer.WEIGHTS,
+        "scale": "0–1 normalized (master agent) + 0–100 detailed",
+        "generated_at": datetime.utcnow().isoformat()
+    }
+    )
     return state

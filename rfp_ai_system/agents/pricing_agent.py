@@ -11,7 +11,7 @@ Key Improvements:
 """
 
 import random
-
+from utils.agent_io import save_agent_output
 
 def pricing_agent(state):
     """
@@ -87,4 +87,15 @@ def pricing_agent(state):
             totals.append(0)
 
     state["prices"] = totals
+    save_agent_output(
+    "pricing_agent",
+    {
+        "prices": totals,
+        "pricing_logic": {
+            "margin_policy": "15–30% based on tender size",
+            "fallback_cost": 50000,
+            "random_margin_variation": "±5%"
+        }
+    }
+    )
     return state

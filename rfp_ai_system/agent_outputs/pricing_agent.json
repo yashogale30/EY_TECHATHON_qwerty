@@ -1,0 +1,8 @@
+{
+    "prices": [],
+    "pricing_logic": {
+        "margin_policy": "15\u201330% based on tender size",
+        "fallback_cost": 50000,
+        "random_margin_variation": "\u00b15%"
+    }
+}
