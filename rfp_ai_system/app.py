@@ -166,7 +166,7 @@ def get_all_agents():
 
     return jsonify(agents)
 
-@app.route("/agents-all")
+@app.route("/agents_all")
 def agents_all_page():
     return render_template("agents_all.html")
 
