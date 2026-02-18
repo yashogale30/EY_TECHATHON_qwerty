@@ -1,0 +1,13 @@
+{
+    "prices": [
+        8382821.16,
+        9216878.79,
+        49528577.3,
+        89213865.4
+    ],
+    "pricing_logic": {
+        "margin_policy": "15\u201330% based on tender size",
+        "fallback_cost": 50000,
+        "random_margin_variation": "\u00b15%"
+    }
+}

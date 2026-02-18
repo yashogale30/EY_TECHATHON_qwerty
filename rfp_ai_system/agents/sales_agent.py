@@ -2,7 +2,7 @@ import requests
 from datetime import datetime, timedelta
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-
+from utils.agent_io import save_agent_output
 # ---------------- HTTP Session with Retry ---------------- #
 
 session = requests.Session()
@@ -95,7 +95,16 @@ def sales_agent(state):
         return state
 
     state["rfps"] = upcoming
-
+    save_agent_output(
+    "sales_agent",
+    {
+        "tender_count": len(upcoming),
+        "rfps": upcoming,
+        "source": SCRAPER_API,
+        "filter_window_days": 90,
+        "generated_at": datetime.utcnow().isoformat()
+    }
+    )
     print(f"✅ Sales Agent shortlisted {len(upcoming)} tenders")
 
     return state

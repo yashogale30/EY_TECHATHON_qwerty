@@ -8,7 +8,7 @@ Selects the best RFP and generates a professional PDF report.
 import os
 import numpy as np
 from pdf_generator_v2 import generate_rfp_pdf
-
+from utils.agent_io import save_agent_output
 
 def master_agent(state):
     """
@@ -63,4 +63,16 @@ def master_agent(state):
         print(f"❌ PDF generation failed: {e}")
         state["pdf_path"] = None
 
+    save_agent_output(
+        "master_agent",
+        {
+            "best_rfp": state["best_rfp"],
+            "pdf_path": state["pdf_path"],
+            "best_score": (
+                float(state["scores"][best])
+                if state.get("scores") else None
+            ),
+            "generated_at": np.datetime64("now").astype(str)
+        }
+    )
     return state

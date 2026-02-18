@@ -7,7 +7,7 @@ Enhanced specification matching with weighted scoring and fuzzy matching
 from utils.spec_flattener import flatten_json
 from typing import List, Dict
 import re
-
+from utils.agent_io import save_agent_output
 
 class TechnicalMatcher:
     """
@@ -170,4 +170,16 @@ def technical_agent(state):
         results.append(matches)
 
     state["tech_matches"] = results
+    save_agent_output(
+    "technical_agent",
+    {
+        "rfp_count": len(state["rfps"]),
+        "matches_per_rfp": [len(r) for r in results],
+        "tech_matches": results,
+        "min_score_threshold": 30.0,
+        "max_results_per_rfp": 30,
+        "spec_weights": TechnicalMatcher.SPEC_WEIGHTS
+    }
+    )
     return state
+
