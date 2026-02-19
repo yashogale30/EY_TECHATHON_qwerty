@@ -203,6 +203,22 @@ SPEC_TO_DB_COL = {
     "standards":            "Standards_Compliance",
 }
 
+# FIX 2 — Weighted spec matching
+# conductor_size_mm2 gets 3× weight because selecting the wrong conductor
+# cross-section is a hard technical failure (undersized = fire risk;
+# oversized = unnecessary cost). All other specs remain weight = 1.
+# Final score = sum(weight_i × hit_i) / sum(weight_i for specified specs)
+SPEC_WEIGHTS = {
+    "voltage":              1,
+    "conductor_material":   1,
+    "insulation_type":      1,
+    "cores":                1,
+    "armoring":             1,
+    "conductor_size_mm2":   3,   # ← 3× — most safety-critical dimension
+    "temperature_rating_c": 1,
+    "standards":            1,
+}
+
 MATERIAL_SYNONYMS = {
     "copper":   ["cu", "copper"],
     "aluminum": ["al", "aluminium", "aluminum", "alumunium"],
@@ -264,11 +280,17 @@ def _match_spec(spec_key: str, rfp_val: str, product_row) -> bool:
         return False
 
     if spec_key == "conductor_size_mm2":
-        # Numeric proximity: match if product size >= rfp size (upward compatible)
+        # FIX 2 — Exact conductor size match only.
+        # The old 10% tolerance (prod_size >= rfp_size * 0.9) was too lenient:
+        # it allowed a 70mm² product to match a 185mm² RFP requirement.
+        # We now require an exact numeric match (e.g. both parse to 185.0).
+        # If no exact match exists the score for this spec = 0, which — combined
+        # with the 3× weight in SPEC_WEIGHTS — strongly penalises size mismatches
+        # and pushes correct-size products to the top of the ranking.
         try:
             rfp_size  = float(rfp_val)
             prod_size = float(re.search(r'\d+(?:\.\d+)?', prod_val).group())
-            return prod_size >= rfp_size * 0.9  # allow 10% tolerance
+            return prod_size == rfp_size
         except Exception:
             return r in p
 
@@ -292,29 +314,39 @@ def _match_spec(spec_key: str, rfp_val: str, product_row) -> bool:
 
 def compute_spec_match(rfp_specs: Dict, product_row) -> tuple:
     """
-    Equal-weighted spec match.
-    Score = (# specs matched) / (# specs specified in RFP) * 100
-    Specs not specified by the RFP are excluded from denominator.
+    FIX 2 — Weighted spec match.
+
+    Score = sum(weight_i × hit_i) / sum(weight_i for specified specs) × 100
+
+    conductor_size_mm2 carries 3× weight (see SPEC_WEIGHTS) because selecting
+    the wrong cross-section is a hard safety/cost failure. All other specs
+    carry weight = 1.
+
+    Specs not specified by the RFP are excluded from both numerator and
+    denominator so they don't dilute or inflate the score.
     """
-    matched         = 0
-    total_specified = 0
-    component       = {}
+    weighted_matched = 0.0
+    total_weight     = 0.0
+    component        = {}
 
     for spec_key in SPEC_TO_DB_COL:
         rfp_val = rfp_specs.get(spec_key)
         if rfp_val is None:
             component[spec_key] = "N/A (not specified)"
             continue
-        total_specified += 1
+
+        weight       = SPEC_WEIGHTS.get(spec_key, 1)
+        total_weight += weight
+
         hit = _match_spec(spec_key, rfp_val, product_row)
         component[spec_key] = "Match" if hit else "No Match"
         if hit:
-            matched += 1
+            weighted_matched += weight
 
-    if total_specified == 0:
+    if total_weight == 0:
         return 0.0, component
 
-    return round((matched / total_specified) * 100, 2), component
+    return round((weighted_matched / total_weight) * 100, 2), component
 
 
 # ─────────────────────────────────────────────────────────────────────────────

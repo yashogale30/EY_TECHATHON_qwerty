@@ -13,16 +13,23 @@ def main():
     # Load product catalog
     product_db = load_oem(OEM_PATH)
 
-    # Load testing services (new — needed by pricing agent)
+    # Load testing services (needed by pricing agent)
     test_services_db = pd.read_excel(OEM_PATH, sheet_name="Testing Services")
-    print(f"✅ Loaded {len(product_db)} products and {len(test_services_db)} test services")
+
+    # FIX 1 & 2 — Load Volume Discounts sheet
+    volume_discounts_db = pd.read_excel(OEM_PATH, sheet_name="Volume Discounts")
+
+    print(f"✅ Loaded {len(product_db)} products, "
+          f"{len(test_services_db)} test services, "
+          f"{len(volume_discounts_db)} volume-discount rows")
 
     graph = build_graph()
 
     state = {
-        "base_url": TENDER_SITE,
-        "product_db": product_db,
-        "test_services_db": test_services_db,
+        "base_url":            TENDER_SITE,
+        "product_db":          product_db,
+        "test_services_db":    test_services_db,
+        "volume_discounts_db": volume_discounts_db,   # NEW — for Fix 1 & 2
     }
 
     final_state = graph.invoke(state)
